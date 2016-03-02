@@ -93,10 +93,6 @@ def main(argv):
     parser = argparse.ArgumentParser()
     parser.add_argument("-i", "--vcf", type=str, dest="vcf", help="Input variant file (vcf)", required=True)
     parser.add_argument("-o", "--output", type=str, dest="out", help="Output file (tabular)", required=True)
-    # parser.add_argument("-X", "--exac", type=str, dest="exac_af_threshold", help="ExAC All threshold",
-    #         default=100, required=False)
-    # parser.add_argument("-XE", "--exacEUR", type=str, dest="exac_eur_threshold", help="ExAC European threshold",
-    #         default=100, required=False)
     parser.add_argument("-v", "--verbosity", action="count", default=0)
 
     args = parser.parse_args()
@@ -107,19 +103,6 @@ def main(argv):
     elif args.verbosity >= 1:
         print "{}^{} == {}".format(args.x, args.y, answer)
 
-    # cadd_tbx = pysam.TabixFile("data/whole_genome_SNVs_inclAnno.tsv.gz")
-    # cadd_indel_tbx = pysam.TabixFile("data/InDels_inclAnno.tsv.gz")
-    # fathmm_tbx = pysam.TabixFile("data/dbNSFP.fathmmW.bed.gz")
-    # exac_tbx = pysam.TabixFile("data/ExAC.r0.3.sites.vep.vcf.gz")
-    # map_tbx = pysam.TabixFile("data/wgEncodeCrgMapabilityAlign100mer.bed.gz")
-    # pfam_tbx = pysam.TabixFile("data/hg19.pfam.sorted.bed.gz")
-    # prom_tbx = pysam.TabixFile("data/hg19.promoter.sorted.bed.gz")
-    # enh_tbx = pysam.TabixFile("data/hg19.enhancer.sorted.bed.gz")
-    # rmsk_tbx = pysam.TabixFile("data/hg19.rmsk.counts.bed.gz")
-    # cpg_tbx = pysam.TabixFile("data/hg19.CpG.bed.gz")
-    # clin_tbx = pysam.TabixFile("data/clinvar_20140303.bed.gz")
-    # gwas_tbx = pysam.TabixFile("data/clinvar_20140303.bed.gz")
-    # condel_tbx = pysam.TabixFile("data/fannsdb.small.bed.gz")
 
     # Output header
     outputfile.write("chr\tpos\tid\tref\talt\tannotation\tgene_name\tlof" \
@@ -138,16 +121,13 @@ def main(argv):
         current_pos = record.POS
         current_ref = record.REF
         current_alt = ','.join(str(v) for v in record.ALT)
-        #current_alt_array = current_alt.split(","
-        # current_af = ','.join(str(v) for v in record.INFO['AF'])
+        current_AF = record.INFO['AF']
         current_het_nfe = ''
         current_hom_nfe = ''
 
         # CHECK INDEL AND MNP
-        #print current_ref + ":" + current_alt
         indel = True if ((len(current_ref) > 1 or len(current_alt) > 1) and \
                 ("," not in current_ref and "," not in current_alt)) else False
-        # mnp = map(labmda x, len(record.ALT)
         mnp = True if len(record.ALT) > 1 else False
         mnpflag = "%s" % mnp
 
@@ -177,56 +157,46 @@ def main(argv):
             current_sift, current_polyphen, current_eur_maf = '','',''
             current_ea_maf, current_LOF, current_gmaf = '','',''
 
-        # SnpEff
-        ann = record.INFO['ANN'][0].split('|')
-        annotation = ann[1]
-        #   GENE INFORMATION
-        current_gene, current_exon, current_aa_pos = ann[3], ann[8], ann[10]
+        # # SnpEff
+        # ann = record.INFO['ANN'][0].split('|')
+        # annotation = ann[1]
+        # #   GENE INFORMATION
+        # current_gene, current_exon, current_aa_pos = ann[3], ann[8], ann[10]
 
         #CADD SNP
-        cadd_phred_temp = ''
-        cadd_phred = ''
-        indel_str= ''
-        mnp_cadds = []
-        cadd_scores = []
-        fathmm_score = 0.0
-        for alt in record.ALT:
-            if(len(current_ref) == 1 and len(alt) == 1):
-                (cadd_phred_temp, cadd_priPhCons, cadd_GerpRS, cadd_polysift) = \
-                        getcadd(cadd_tbx, current_chr, current_pos, current_ref, alt)
-                mnp_cadds.append(str(alt) + ":" + cadd_phred_temp)
-                cadd_scores.append(cadd_phred_temp)
-                # GET FATHMM SCORE
-                fathmm_score = getfathmm(fathmm_tbx, current_chr, current_pos, current_ref, alt)
-            else: # IF VAR IS AN INDEL
-                (cadd_phred_temp, cadd_priPhCons, cadd_GerpRS, cadd_polysift) = \
-                        getcadd(cadd_indel_tbx, current_chr, current_pos, current_ref, alt)
-                mnp_cadds.append(str(alt) + ":" + cadd_phred_temp)
-                cadd_scores.append(cadd_phred_temp)
-        cadd_phred = ",".join(mnp_cadds)
+        # cadd_phred_temp = ''
+        # cadd_phred = ''
+        # indel_str= ''
+        # mnp_cadds = []
+        # cadd_scores = []
+        # fathmm_score = 0.0
+        # for alt in record.ALT:
+        #     if(len(current_ref) == 1 and len(alt) == 1):
+        #         (cadd_phred_temp, cadd_priPhCons, cadd_GerpRS, cadd_polysift) = \
+        #                 getcadd(cadd_tbx, current_chr, current_pos, current_ref, alt)
+        #         mnp_cadds.append(str(alt) + ":" + cadd_phred_temp)
+        #         cadd_scores.append(cadd_phred_temp)
+        #         # GET FATHMM SCORE
+        #         fathmm_score = getfathmm(fathmm_tbx, current_chr, current_pos, current_ref, alt)
+        #     else: # IF VAR IS AN INDEL
+        #         (cadd_phred_temp, cadd_priPhCons, cadd_GerpRS, cadd_polysift) = \
+        #                 getcadd(cadd_indel_tbx, current_chr, current_pos, current_ref, alt)
+        #         mnp_cadds.append(str(alt) + ":" + cadd_phred_temp)
+        #         cadd_scores.append(cadd_phred_temp)
+        # cadd_phred = ",".join(mnp_cadds)
         # indel_str = "."
 
         # INSERT OTHER TABIX BASED ANNOTATORS BELOW
-        current_mapability = getTabixVal(map_tbx, current_chr, current_pos, current_ref, current_alt)
-        current_pfam = getTabixVal(pfam_tbx, current_chr, current_pos, current_ref, current_alt)
-        current_promoter = getTabixBool(prom_tbx, current_chr, current_pos, current_ref, current_alt)
-        current_enhancer = getTabixBool(enh_tbx, current_chr, current_pos, current_ref, current_alt)
-        current_rmsk = getTabixBool(rmsk_tbx, current_chr, current_pos, current_ref, current_alt)
-        current_cpg = getTabixBool(cpg_tbx, current_chr, current_pos, current_ref, current_alt)
-        current_clinvar = getTabixVal(clin_tbx, current_chr, current_pos, current_ref, current_alt)
-        current_gwas = getTabixVal(gwas_tbx, current_chr, current_pos, current_ref, current_alt)
-        current_condel = getTabixValCondel(condel_tbx, current_chr, current_pos, current_ref, current_alt)
         current_AF = record.INFO['AF']
 
         # RESCORE SCORES FOR PROTEIN TRUNCATING MUTATIONS
-        (current_condel, current_sift, current_polyphen, fathmm_score) = adjust_scores(current_condel, current_sift, \
-                current_polyphen, fathmm_score, annotation)
+        # (current_condel, current_sift, current_polyphen, fathmm_score) = adjust_scores(current_condel, current_sift, \
+        #         current_polyphen, fathmm_score, annotation)
 
         out_str = [ current_chr, str(current_pos), str(current_id), current_ref, current_alt,
                 annotation, current_gene, current_LOF, current_exon,
                 current_aa_pos, str(current_sift_score), str(current_polyphen_score), str(current_condel), str(current_AF),
                 current_gmaf, current_eur_maf, current_ea_maf,
-                #current_het_nfe, current_hom_nfe,
                 str(current_exac_af), str(current_exac_eas), str(current_exac_nfe), str(current_exac_fin),
                 str(current_exac_sas), str(current_exac_afr), str(current_exac_amr), str(current_exac_oth),
                 cadd_phred, str(max(cadd_scores)), cadd_priPhCons, cadd_GerpRS,
@@ -235,21 +205,12 @@ def main(argv):
                 mnpflag, exac_flag]
         out_str = [x or '.' for x in out_str]
 
-        # filters ExAC ALL
-        if( 'PASS' in exac_flag ): # IF IT IS A PASS ExAC SITE - FILTER ON AF
-            if( float(current_exac_af) <= float(args.exac_af_threshold) ):
-                outputfile.write("\t".join(out_str))
-                outputfile.write("\n")
-            #else:
-            #    outputfile.write("- ")
-            #    outputfile.write("\t".join(out_str))
-            #    outputfile.write("\n")
-        else: # THE EXAC CALL IS NOT RELIABLE THEREFORE CANNNOT FILTER ON AF
-            outputfile.write("\t".join(out_str))
-            outputfile.write("\n")
+        # filter away!
 
-    outputfile.close()
 
+        outputfile.write("\t".join(out_str))
+        outputfile.write("\n")
+        outputfile.close()
 
 if __name__ == "__main__":
     main(sys.argv)
