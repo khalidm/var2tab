@@ -1,8 +1,8 @@
 # vcf2tab
 
-Install:
+## Install:
 coming soon...
 
-Example:
+## Example:
 
 python src/main.py -i example/example.vcf -o example/example.tab
