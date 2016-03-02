@@ -1,1 +1,1 @@
-# var2tab
+# vcf2tab
